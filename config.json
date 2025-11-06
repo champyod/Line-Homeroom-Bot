@@ -1,6 +1,7 @@
 {
   "cycle_start_date": "2025-10-27",
-  "default_event_time": "8:00",
+  "default_homeroom_time": "08:00",
+  "default_assembly_time": "07:50",
   "message_templates": {
     "homeroom_header": "HOMEROOM REMINDER (WEEK {week_type})",
     "assembly_header": "ASSEMBLY NOTICE",
@@ -12,24 +13,51 @@
   "special_assembly_days": {
     "2025-11-10": {
       "location": "หอประชุมพระอุบาลี",
-      "detail": "culteral day"
+      "detail": "culteral day",
+      "time": "07:50",
+      "templates": {
+        "header": "ประกาศพิเศษ: เข้าแถวรวมที่ {location}",
+        "alt": "วันนี้มีการเข้าแถวรวมที่ {location} เวลา {time} - {detail}",
+        "body_sub": "กรุณาไปที่ {location} เวลา {time}"
+      }
+    },
+    "2025-11-11": {
+      "location": "สถานที่โฮมรูม",
+      "detail": "พิธีเปิดกีฬาสี",
+      "time": "07:50",
+      "templates": {
+        "header": "HOMEROOM พิเศษ",
+        "alt": "วันนี้มีโฮมรูมพิเศษที่ {location} เวลา {time}",
+        "body_sub": "โฮมรูมที่ {location} เวลา {time} - {detail}"
+      }
     }
   },
   "special_homeroom_days": {
-    "2025-11-11": "สถานที่โฮมรูม"
   },
   "room_schedule": {
-    "0": "ห้อง 2302",
+    "0": { 
+      "location": "ห้อง 2302", 
+      "time": "08:00",
+      "templates": {
+        "body_sub": "เริ่มโฮมรูมเวลา {time}",
+        "alt": "วันนี้ Homeroom ที่ {location} เวลา {time}"
+      }
+    },
     "1": [
-      "ห้อง 3503",
-      "ห้อง 3703"
+      { "location": "ห้อง 3503", "templates": { "body_sub": "วันนี้ Homeroom ที่ {location} เวลา {time}", "alt": "Homeroom A: {location} เวลา {time}" } },
+      { "location": "ห้อง 3703", "templates": { "body_sub": "วันนี้ Homeroom ที่ {location} เวลา {time}", "alt": "Homeroom B: {location} เวลา {time}" } }
     ],
-    "2": "ห้อง 3403",
+    "2": { "location": "ห้อง 3403", "templates": { "body_sub": "วันนี้ Homeroom ที่ {location} เวลา {time}", "alt": "Homeroom: {location} เวลา {time}" } },
     "3": {
       "type": "assembly",
       "location": "ศูนย์กีฬา",
-      "detail": "เข้าแถวรวมระดับชั้น"
+      "detail": "เข้าแถวรวมระดับชั้น",
+      "time": "07:50",
+      "templates": {
+        "alt": "เข้าแถวรวมที่ {location} เวลา {time}",
+        "body_sub": "วันนี้เข้าแถวรวมที่ {location}"
+      }
     },
-    "4": "ห้อง 1107"
+    "4": { "location": "ห้อง 1107", "templates": { "body_sub": "วันนี้ Homeroom ที่ {location} เวลา {time}", "alt": "Homeroom: {location} เวลา {time}" } }
   }
 }

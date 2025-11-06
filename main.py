@@ -40,8 +40,9 @@ def main():
         SPECIAL_ASSEMBLY_DAYS = config.get("special_assembly_days", {})
         SPECIAL_HOMEROOM_DAYS = config.get("special_homeroom_days", {})
         ROOM_SCHEDULE = config.get("room_schedule", {})
-        # New optional config values
-        DEFAULT_EVENT_TIME = config.get("default_event_time", "8:00")
+        # New optional config values: separate defaults for homeroom and assembly
+        DEFAULT_HOMEROOM_TIME = config.get("default_homeroom_time", "8:00")
+        DEFAULT_ASSEMBLY_TIME = config.get("default_assembly_time", "8:00")
         MESSAGE_TEMPLATES = config.get("message_templates", {})
     except (TypeError, ValueError, KeyError) as e:
         print(f"Error parsing config values: {e}. Check format in config.json.")
@@ -52,7 +53,8 @@ def main():
     today_str = now_in_bangkok.strftime('%Y-%m-%d')
     weekday = now_in_bangkok.weekday()
 
-    event_type, event_location, event_detail, event_time = None, None, None, DEFAULT_EVENT_TIME
+    # event_time will be set per-event depending on type (homeroom/assembly)
+    event_type, event_location, event_detail, event_time = None, None, None, None
 
     # helper to format templates safely
     def _safe_format(template: str, ctx: dict) -> str:
@@ -75,7 +77,12 @@ def main():
         if isinstance(event_data, dict):
             event_location = event_data.get("location", "ไม่ระบุ")
             event_detail = event_data.get("detail")
-            event_time = event_data.get("time", event_time)
+            # look for explicit assembly time, fall back to default assembly time
+            event_time = event_data.get("time", DEFAULT_ASSEMBLY_TIME)
+            # allow per-entry message/template overrides
+            entry_templates = event_data.get("templates", {}) if isinstance(event_data, dict) else {}
+            # shorthand: single `message` can override main body text
+            entry_message = event_data.get("message") if isinstance(event_data, dict) else None
         else:
             event_location = event_data
     elif today_str in SPECIAL_HOMEROOM_DAYS: # Priority 3: Special Homerooms
@@ -84,7 +91,10 @@ def main():
         # homeroom entry can be string or dict {"location":..., "time":...}
         if isinstance(homeroom_entry, dict):
             event_location = homeroom_entry.get("location")
-            event_time = homeroom_entry.get("time", event_time)
+            # look for explicit homeroom time, fall back to default homeroom time
+            event_time = homeroom_entry.get("time", DEFAULT_HOMEROOM_TIME)
+            entry_templates = homeroom_entry.get("templates", {})
+            entry_message = homeroom_entry.get("message")
         else:
             event_location = homeroom_entry
     elif str(weekday) in ROOM_SCHEDULE: # Priority 4: Regular Weekly Schedule
@@ -93,14 +103,18 @@ def main():
             event_type = "assembly"
             event_location = entry.get("location", "ไม่ระบุ")
             event_detail = entry.get("detail")
-            event_time = entry.get("time", event_time)
+            event_time = entry.get("time", DEFAULT_ASSEMBLY_TIME)
+            entry_templates = entry.get("templates", {})
+            entry_message = entry.get("message")
         else:
             event_type = "homeroom"
             # entry may be a string, list (A/B week) or dict with explicit time
             if isinstance(entry, dict):
                 # allow {"location":..., "time":...} structure for homeroom
                 event_location = entry.get("location")
-                event_time = entry.get("time", event_time)
+                event_time = entry.get("time", DEFAULT_HOMEROOM_TIME)
+                entry_templates = entry.get("templates", {})
+                entry_message = entry.get("message")
             else:
                 event_location = entry
     
@@ -109,36 +123,69 @@ def main():
         return
 
     # --- Resolve A/B week for Homeroom events ---
-    if event_type == "homeroom" and isinstance(event_location, list):
+    current_week_type = None
+    if event_type == "homeroom":
         weeks_passed = (now_in_bangkok.date() - CYCLE_START_DATE).days // 7
         current_week_type = "A" if weeks_passed % 2 == 0 else "B"
-        event_location = event_location[0] if current_week_type == "A" else event_location[1]
+        if isinstance(event_location, list):
+            event_location = event_location[0] if current_week_type == "A" else event_location[1]
     
     # --- Build and Send Message ---
     try:
-        # Prepare message texts using templates if provided in config
+        # Merge global templates with any per-entry templates (per-entry overrides global)
+        entry_templates_local = entry_templates if 'entry_templates' in locals() and entry_templates else {}
+        templates = {**MESSAGE_TEMPLATES, **entry_templates_local}
+
+        # Prepare message texts using templates
         header_text = ""
-        # body_text_main is main headline / room or assembly message
-        body_text_main = event_location
-        body_text_sub = _safe_format(MESSAGE_TEMPLATES.get("body_sub_template", "วันนี้ เวลา {time} ครับ"), {"time": event_time, "location": event_location, "detail": event_detail})
+        # build a formatting context available to all templates
+        template_ctx = {"time": event_time, "location": event_location, "detail": event_detail, "week_type": current_week_type}
+
+        # Determine main body text (priority: per-entry message -> templates.body_main -> type-specific template -> location)
+        body_text_main = None
+        if 'entry_message' in locals() and entry_message:
+            ctx = {"time": event_time, "location": event_location, "detail": event_detail}
+            if current_week_type is not None:
+                ctx["week_type"] = current_week_type
+            body_text_main = _safe_format(entry_message, ctx)
+        elif templates.get("body_main"):
+            body_text_main = _safe_format(templates.get("body_main"), template_ctx)
+        else:
+            # choose global per-type main template if present
+            if event_type == "homeroom":
+                body_main_template = templates.get("homeroom_body_main")
+            else:
+                body_main_template = templates.get("assembly_body_main")
+            if body_main_template:
+                body_text_main = _safe_format(body_main_template, template_ctx)
+            else:
+                body_text_main = event_location
+
+        # choose body_sub template per event type (allow per-entry overrides via merged `templates`)
+        if event_type == "homeroom":
+            body_sub_template = templates.get("homeroom_body_sub", templates.get("body_sub_template", "วันนี้ เวลา {time} ครับ"))
+        else:
+            body_sub_template = templates.get("assembly_body_sub", templates.get("body_sub_template", "วันนี้ เวลา {time} ครับ"))
+
+        body_text_sub = _safe_format(body_sub_template, {"time": event_time, "location": event_location, "detail": event_detail})
         alt_text = ""
 
         if event_type == "homeroom":
             weeks_passed = (now_in_bangkok.date() - CYCLE_START_DATE).days // 7
             current_week_type = "A" if weeks_passed % 2 == 0 else "B"
-            header_template = MESSAGE_TEMPLATES.get("homeroom_header", "HOMEROOM REMINDER (WEEK {week_type})")
+            header_template = templates.get("homeroom_header", templates.get("header", "HOMEROOM REMINDER (WEEK {week_type})"))
             header_text = _safe_format(header_template, {"week_type": current_week_type, "location": event_location, "time": event_time})
-            alt_template = MESSAGE_TEMPLATES.get("homeroom_alt", "Week {week_type}: วันนี้ Homeroom {location} เวลา {time} ครับ")
+            alt_template = templates.get("homeroom_alt", templates.get("alt", "Week {week_type}: วันนี้ Homeroom {location} เวลา {time} ครับ"))
             alt_text = _safe_format(alt_template, {"week_type": current_week_type, "location": event_location, "time": event_time, "detail": event_detail})
         elif event_type == "assembly":
-            header_template = MESSAGE_TEMPLATES.get("assembly_header", "ASSEMBLY NOTICE")
+            header_template = templates.get("assembly_header", templates.get("header", "ASSEMBLY NOTICE"))
             header_text = _safe_format(header_template, {"location": event_location, "time": event_time, "detail": event_detail})
-            body_text_main = f"เข้าแถวรวมที่ {event_location}"
-            alt_template = MESSAGE_TEMPLATES.get("assembly_alt", "แจ้งเตือน: วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ")
+            body_text_main = _safe_format(templates.get("assembly_body_main", f"เข้าแถวรวมที่ {event_location}"), {"location": event_location, "time": event_time, "detail": event_detail})
+            alt_template = templates.get("assembly_alt", templates.get("alt", "แจ้งเตือน: วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"))
             alt_text = _safe_format(alt_template, {"location": event_location, "time": event_time, "detail": event_detail})
             if event_detail:
                 # allow templates to include detail; if not, append
-                if "{detail}" not in MESSAGE_TEMPLATES.get("assembly_alt", ""):
+                if "{detail}" not in templates.get("assembly_alt", ""):
                     alt_text += f" - {event_detail}"
 
         body_contents = [
