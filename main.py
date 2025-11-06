@@ -31,7 +31,7 @@ ROOM_SCHEDULE = {
     0: "ห้อง 2302",                     # Monday
     1: ("ห้อง 3503", "ห้อง 3703"),      # Tuesday (A/B)
     2: "ห้อง 3403",                     # Wednesday
-    3: "ห้อง 3705",                     # Thursday
+                         # Thursday
     4: "ห้อง 1107"                      # Friday
 }
 
