@@ -1,7 +1,12 @@
 {
   "cycle_start_date": "2025-10-27",
   "holidays": [],
-  "special_assembly_days": {},
+  "special_assembly_days": {
+    "2025-11-10": {
+      "location": "หอประชุมพระอุบาลี",
+      "detail": "culteral day"
+    }
+  },
   "room_schedule": {
     "0": "ห้อง 2302",
     "1": [
@@ -12,6 +17,7 @@
     "3": {
       "type": "assembly",
       "location": "ศูนย์กีฬา"
+      "detail": "เข้าแถวรวมระดับชั้น"
     },
     "4": "ห้อง 1107"
   }
