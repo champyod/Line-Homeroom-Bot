@@ -6,8 +6,11 @@
     "homeroom_header": "HOMEROOM REMINDER (WEEK {week_type})",
     "assembly_header": "ASSEMBLY NOTICE",
     "homeroom_alt": "Week {week_type}: วันนี้ Homeroom {location} เวลา {time} ครับ",
-    "assembly_alt": "แจ้งเตือน: วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ",
-    "body_sub_template": "วันนี้ เวลา {time} ครับ"
+    "assembly_alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ",
+    "homeroom_body_main": "โฮมรูมห้อง {location}",
+    "assembly_body_main": "เข้าแถวรวมที่ {location}",
+    "homeroom_body_sub": "วันนี้ เวลา {time} ครับ",
+    "assembly_body_sub": "วันนี้ เวลา {time} ครับ"
   },
   "holidays": [],
   "special_assembly_days": {
@@ -16,48 +19,47 @@
       "detail": "culteral day",
       "time": "07:50",
       "templates": {
-        "header": "ประกาศพิเศษ: เข้าแถวรวมที่ {location}",
-        "alt": "วันนี้มีการเข้าแถวรวมที่ {location} เวลา {time} - {detail}",
-        "body_sub": "กรุณาไปที่ {location} เวลา {time}"
+        "header": "ASSEMBLY NOTICE",
+        "body_main": "เข้าแถวรวมที่ {location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
       }
     },
     "2025-11-11": {
-      "location": "สถานที่โฮมรูม",
+      "location": "สนามฟุตบอล",
       "detail": "พิธีเปิดกีฬาสี",
-      "time": "07:50",
-      "templates": {
-        "header": "HOMEROOM พิเศษ",
-        "alt": "วันนี้มีโฮมรูมพิเศษที่ {location} เวลา {time}",
-        "body_sub": "โฮมรูมที่ {location} เวลา {time} - {detail}"
-      }
+      "time": "07:50"
     }
   },
-  "special_homeroom_days": {
-  },
   "room_schedule": {
-    "0": { 
-      "location": "ห้อง 2302", 
+    "0": {
+      "location": "ห้อง 2302",
+      "type": "homeroom",
       "time": "08:00",
       "templates": {
-        "body_sub": "เริ่มโฮมรูมเวลา {time}",
-        "alt": "วันนี้ Homeroom ที่ {location} เวลา {time}"
+        "header": "HOMEROOM REMINDER (WEEK {week_type})",
+        "body_main": "โฮมรูมห้อง {location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้โฮมรูมห้อง {location} เวลา {time} ครับ"
       }
     },
     "1": [
-      { "location": "ห้อง 3503", "templates": { "body_sub": "วันนี้ Homeroom ที่ {location} เวลา {time}", "alt": "Homeroom A: {location} เวลา {time}" } },
-      { "location": "ห้อง 3703", "templates": { "body_sub": "วันนี้ Homeroom ที่ {location} เวลา {time}", "alt": "Homeroom B: {location} เวลา {time}" } }
+      "ห้อง 3503",
+      "ห้อง 3703"
     ],
-    "2": { "location": "ห้อง 3403", "templates": { "body_sub": "วันนี้ Homeroom ที่ {location} เวลา {time}", "alt": "Homeroom: {location} เวลา {time}" } },
+    "2": "ห้อง 3403",
     "3": {
       "type": "assembly",
       "location": "ศูนย์กีฬา",
       "detail": "เข้าแถวรวมระดับชั้น",
       "time": "07:50",
       "templates": {
-        "alt": "เข้าแถวรวมที่ {location} เวลา {time}",
-        "body_sub": "วันนี้เข้าแถวรวมที่ {location}"
+        "header": "ASSEMBLY NOTICE",
+        "body_main": "เข้าแถวรวมที่ {location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
       }
     },
-    "4": { "location": "ห้อง 1107", "templates": { "body_sub": "วันนี้ Homeroom ที่ {location} เวลา {time}", "alt": "Homeroom: {location} เวลา {time}" } }
+    "4": "ห้อง 1107"
   }
 }
