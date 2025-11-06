@@ -22,7 +22,7 @@ A simple, configurable Python bot to send daily homeroom and assembly reminders 
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/Line-Homeroom-Bot.git
+    git clone https://github.com/champyod/Line-Homeroom-Bot.git
     cd Line-Homeroom-Bot
     ```
 
