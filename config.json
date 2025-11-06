@@ -7,6 +7,9 @@
       "detail": "culteral day"
     }
   },
+  "special_homeroom_days": {
+    "2025-11-11": "สถานที่โฮมรูม"
+  },
   "room_schedule": {
     "0": "ห้อง 2302",
     "1": [
