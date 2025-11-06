@@ -1,6 +1,6 @@
 import os
 import warnings
-import json
+import orjson
 from datetime import datetime, date
 import pytz
 from linebot import LineBotApi
@@ -12,12 +12,15 @@ from linebot.exceptions import LineBotApiError
 # ==============================================================================
 
 def load_config():
-    """Loads the configuration from config.json."""
+    """Loads the configuration from config.json using the orjson library."""
     try:
-        with open('config.json', 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception as e:
-        print(f"Error loading or parsing config.json: {e}")
+        with open('config.json', 'rb') as f:
+            return orjson.loads(f.read())
+    except FileNotFoundError:
+        print("Error: config.json not found!")
+        return None
+    except orjson.JSONDecodeError as e:
+        print(f"Error decoding config.json: {e}. Check for syntax errors.")
         return None
 
 def main():
@@ -49,18 +52,18 @@ def main():
     event_type, event_location, event_detail, event_time = None, None, None, "8:00"
 
     # --- Determine the event based on priority ---
-    if today_str in HOLIDAYS: # Priority 1: Holidays
+    if today_str in HOLIDAYS:
         print(f"Today ({today_str}) is a holiday. No message sent.")
         return
-    elif today_str in SPECIAL_ASSEMBLY_DAYS: # Priority 2: Special Assemblies
+    elif today_str in SPECIAL_ASSEMBLY_DAYS:
         event_data = SPECIAL_ASSEMBLY_DAYS[today_str]
         event_type = "assembly"
         event_location = event_data.get("location", "ไม่ระบุ")
         event_detail = event_data.get("detail")
-    elif today_str in SPECIAL_HOMEROOM_DAYS: # Priority 3: Special Homerooms
+    elif today_str in SPECIAL_HOMEROOM_DAYS:
         event_type = "homeroom"
         event_location = SPECIAL_HOMEROOM_DAYS[today_str]
-    elif str(weekday) in ROOM_SCHEDULE: # Priority 4: Regular Weekly Schedule
+    elif str(weekday) in ROOM_SCHEDULE:
         entry = ROOM_SCHEDULE[str(weekday)]
         if isinstance(entry, dict) and entry.get("type") == "assembly":
             event_type = "assembly"
