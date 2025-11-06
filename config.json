@@ -1,7 +1,10 @@
 {
+  // Configuration for Line Homeroom Bot
   "cycle_start_date": "2025-10-27",
   "default_homeroom_time": "08:00",
   "default_assembly_time": "07:50",
+  
+  // Global message templates
   "message_templates": {
     "homeroom_header": "HOMEROOM REMINDER (WEEK {week_type})",
     "assembly_header": "ASSEMBLY NOTICE",
@@ -12,36 +15,40 @@
     "homeroom_body_sub": "วันนี้ เวลา {time} ครับ",
     "assembly_body_sub": "วันนี้ เวลา {time} ครับ"
   },
-  "holidays": [],
+  "holidays": [], // Add holiday dates here
+  
+  // Special assembly days with custom locations and times
   "special_assembly_days": {
     "2025-11-10": {
       "location": "หอประชุมพระอุบาลี",
       "detail": "culteral day",
       "time": "07:50",
       "templates": {
-        "assembly_header": "ASSEMBLY NOTICE",
-        "assembly_body_main": "เข้าแถวรวมที่ {location}",
-        "assembly_body_sub": "วันนี้ เวลา {time} ครับ",
-        "assembly_alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
+        "header": "SPECIAL ASSEMBLY NOTICE",
+        "body_main": "{location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
       }
     },
     "2025-11-11": {
       "location": "สนามฟุตบอล",
       "detail": "พิธีเปิดกีฬาสี",
-      "time": "07:50"
+      "templates": {
+        "header": "SPECIAL ASSEMBLY NOTICE"
+      }
     }
   },
   "special_homeroom_days": {
-    "2025-11-06": {
-      "location": "ห้อง 2302",
-      "time": "08:15",
-      "templates": {
-        "homeroom_header": "HOMEROOM พิเศษ (WEEK {week_type})",
-        "homeroom_body_main": "โฮมรูมพิเศษ {location}",
-        "homeroom_body_sub": "วันนี้ เวลา {time} ครับ",
-        "homeroom_alt": "วันนี้โฮมรูมพิเศษที่ {location} เวลา {time} ครับ"
-      }
-    }
+    // "2025-11-06": {
+    //   "location": "ห้อง 2302",
+    //   "time": "08:15",
+    //   "templates": {
+    //     "header": "SPECIAL HOMEROOM (WEEK {week_type})",
+    //     "body_main": "โฮมรูมพิเศษ {location}",
+    //     "body_sub": "วันนี้ เวลา {time} ครับ",
+    //     "alt": "วันนี้โฮมรูมพิเศษที่ {location} เวลา {time} ครับ"
+    //   }
+    // }
   },
   "room_schedule": {
     "0": {
@@ -49,10 +56,10 @@
       "type": "homeroom",
       "time": "08:00",
       "templates": {
-        "homeroom_header": "HOMEROOM REMINDER (WEEK {week_type})",
-        "homeroom_body_main": "โฮมรูมห้อง {location}",
-        "homeroom_body_sub": "วันนี้ เวลา {time} ครับ",
-        "homeroom_alt": "วันนี้โฮมรูมห้อง {location} เวลา {time} ครับ"
+        "header": "HOMEROOM REMINDER (WEEK {week_type})",
+        "body_main": "โฮมรูมห้อง {location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้โฮมรูมห้อง {location} เวลา {time} ครับ"
       }
     },
     "1": [
@@ -66,10 +73,10 @@
       "detail": "เข้าแถวรวมระดับชั้น",
       "time": "07:50",
       "templates": {
-        "assembly_header": "ASSEMBLY NOTICE",
-        "assembly_body_main": "เข้าแถวรวมที่ {location}",
-        "assembly_body_sub": "วันนี้ เวลา {time} ครับ",
-        "assembly_alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
+        "header": "ASSEMBLY NOTICE",
+        "body_main": "เข้าแถวรวมที่ {location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
       }
     },
     "4": "ห้อง 1107"

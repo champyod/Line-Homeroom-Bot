@@ -1,6 +1,7 @@
 import os
 import warnings
 import json
+import re
 from datetime import datetime, date
 import pytz
 from dotenv import load_dotenv
@@ -17,7 +18,12 @@ load_dotenv()
 def load_config():
     try:
         with open('config.json', 'r', encoding='utf-8') as f:
-            return json.load(f)
+            content = f.read()
+            # Remove single-line comments (// comment)
+            content = re.sub(r'//.*', '', content)
+            # Remove multi-line comments (/* comment */)
+            content = re.sub(r'/\*[\s\S]*?\*/', '', content)
+            return json.loads(content)
     except Exception as e:
         print(f"Error loading or parsing config.json: {e}")
         return None
@@ -128,32 +134,22 @@ def main():
             return default
 
         if event_type == "homeroom":
-            body_main_template = lookup_template(templates, ["homeroom_body_main", "body_main"], "โฮมรูม {location}")
-        else:
-            body_main_template = lookup_template(templates, ["assembly_body_main", "body_main"], "เข้าแถวรวมที่ {location}")
-        body_text_main = _safe_format(body_main_template, template_ctx)
-
-        if event_type == "homeroom":
-            body_sub_template = lookup_template(templates, ["homeroom_body_sub", "body_sub_template", "body_sub"], "วันนี้ เวลา {time} ครับ")
-        else:
-            body_sub_template = lookup_template(templates, ["assembly_body_sub", "body_sub_template", "body_sub"], "วันนี้ เวลา {time} ครับ")
-
-        body_text_sub = _safe_format(body_sub_template, {"time": event_time, "location": event_location, "detail": event_detail})
-        alt_text = ""
-
-        if event_type == "homeroom":
-            header_template = lookup_template(templates, ["homeroom_header", "header"], "HOMEROOM REMINDER (WEEK {week_type})")
+            header_template = lookup_template(templates, ["header", "homeroom_header"], "HOMEROOM REMINDER (WEEK {week_type})")
             header_text = _safe_format(header_template, {"week_type": current_week_type, "location": event_location, "time": event_time})
-            alt_template = lookup_template(templates, ["homeroom_alt", "alt"], "Week {week_type}: วันนี้ Homeroom {location} เวลา {time} ครับ")
+            body_main_template = lookup_template(templates, ["body_main", "homeroom_body_main"], "โฮมรูม {location}")
+            body_sub_template = lookup_template(templates, ["body_sub", "homeroom_body_sub"], "วันนี้ เวลา {time} ครับ")
+            alt_template = lookup_template(templates, ["alt", "homeroom_alt"], "Week {week_type}: วันนี้ Homeroom {location} เวลา {time} ครับ")
             alt_text = _safe_format(alt_template, {"week_type": current_week_type, "location": event_location, "time": event_time, "detail": event_detail})
-        elif event_type == "assembly":
-            header_template = lookup_template(templates, ["assembly_header", "header"], "ASSEMBLY NOTICE")
+        else:
+            header_template = lookup_template(templates, ["header", "assembly_header"], "ASSEMBLY NOTICE")
             header_text = _safe_format(header_template, {"location": event_location, "time": event_time, "detail": event_detail})
-            alt_template = lookup_template(templates, ["assembly_alt", "alt"], "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ")
+            body_main_template = lookup_template(templates, ["body_main", "assembly_body_main"], "เข้าแถวรวมที่ {location}")
+            body_sub_template = lookup_template(templates, ["body_sub", "assembly_body_sub"], "วันนี้ เวลา {time} ครับ")
+            alt_template = lookup_template(templates, ["alt", "assembly_alt"], "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ")
             alt_text = _safe_format(alt_template, {"location": event_location, "time": event_time, "detail": event_detail})
-            if event_detail:
-                if "{detail}" not in alt_template:
-                    alt_text += f" - {event_detail}"
+
+        body_text_main = _safe_format(body_main_template, template_ctx)
+        body_text_sub = _safe_format(body_sub_template, {"time": event_time, "location": event_location, "detail": event_detail})
 
         body_contents = [
             { "type": "text", "text": body_text_main, "weight": "bold", "size": "xl", "margin": "md", "wrap": True },
