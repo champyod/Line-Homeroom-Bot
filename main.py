@@ -5,9 +5,11 @@ from datetime import datetime, date
 import pytz
 from linebot import LineBotApi
 from linebot.models import FlexSendMessage
-from linebot.exceptions import LineBotApiError, LineBotSdkDeprecatedIn_3_0
+from linebot.exceptions import LineBotApiError
 
-warnings.filterwarnings("ignore", category=LineBotSdkDeprecatedIn_3_0)
+# ==============================================================================
+# --- LOGIC SECTION ---
+# ==============================================================================
 
 def load_config():
     """Loads the configuration from config.json."""
@@ -33,7 +35,7 @@ def main():
         CYCLE_START_DATE = datetime.strptime(config["cycle_start_date"], '%Y-%m-%d').date()
         HOLIDAYS = config.get("holidays", [])
         SPECIAL_ASSEMBLY_DAYS = config.get("special_assembly_days", {})
-        SPECIAL_HOMEROOM_DAYS = config.get("special_homeroom_days", {}) # <-- NEW
+        SPECIAL_HOMEROOM_DAYS = config.get("special_homeroom_days", {})
         ROOM_SCHEDULE = config.get("room_schedule", {})
     except (TypeError, ValueError, KeyError) as e:
         print(f"Error parsing config values: {e}. Check format in config.json.")
