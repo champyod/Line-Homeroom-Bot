@@ -40,6 +40,9 @@ def main():
         SPECIAL_ASSEMBLY_DAYS = config.get("special_assembly_days", {})
         SPECIAL_HOMEROOM_DAYS = config.get("special_homeroom_days", {})
         ROOM_SCHEDULE = config.get("room_schedule", {})
+        # New optional config values
+        DEFAULT_EVENT_TIME = config.get("default_event_time", "8:00")
+        MESSAGE_TEMPLATES = config.get("message_templates", {})
     except (TypeError, ValueError, KeyError) as e:
         print(f"Error parsing config values: {e}. Check format in config.json.")
         return
@@ -49,7 +52,17 @@ def main():
     today_str = now_in_bangkok.strftime('%Y-%m-%d')
     weekday = now_in_bangkok.weekday()
 
-    event_type, event_location, event_detail, event_time = None, None, None, "8:00"
+    event_type, event_location, event_detail, event_time = None, None, None, DEFAULT_EVENT_TIME
+
+    # helper to format templates safely
+    def _safe_format(template: str, ctx: dict) -> str:
+        if not template:
+            return ""
+        try:
+            return template.format(**ctx)
+        except Exception:
+            # if formatting fails (missing keys), return template as-is
+            return template
 
     # --- Determine the event based on priority ---
     if today_str in HOLIDAYS: # Priority 1: Holidays
@@ -58,20 +71,38 @@ def main():
     elif today_str in SPECIAL_ASSEMBLY_DAYS: # Priority 2: Special Assemblies
         event_data = SPECIAL_ASSEMBLY_DAYS[today_str]
         event_type = "assembly"
-        event_location = event_data.get("location", "ไม่ระบุ")
-        event_detail = event_data.get("detail")
+        # assembly entry can be a string or dict with location/detail/time
+        if isinstance(event_data, dict):
+            event_location = event_data.get("location", "ไม่ระบุ")
+            event_detail = event_data.get("detail")
+            event_time = event_data.get("time", event_time)
+        else:
+            event_location = event_data
     elif today_str in SPECIAL_HOMEROOM_DAYS: # Priority 3: Special Homerooms
         event_type = "homeroom"
-        event_location = SPECIAL_HOMEROOM_DAYS[today_str]
+        homeroom_entry = SPECIAL_HOMEROOM_DAYS[today_str]
+        # homeroom entry can be string or dict {"location":..., "time":...}
+        if isinstance(homeroom_entry, dict):
+            event_location = homeroom_entry.get("location")
+            event_time = homeroom_entry.get("time", event_time)
+        else:
+            event_location = homeroom_entry
     elif str(weekday) in ROOM_SCHEDULE: # Priority 4: Regular Weekly Schedule
         entry = ROOM_SCHEDULE[str(weekday)]
         if isinstance(entry, dict) and entry.get("type") == "assembly":
             event_type = "assembly"
             event_location = entry.get("location", "ไม่ระบุ")
             event_detail = entry.get("detail")
+            event_time = entry.get("time", event_time)
         else:
             event_type = "homeroom"
-            event_location = entry
+            # entry may be a string, list (A/B week) or dict with explicit time
+            if isinstance(entry, dict):
+                # allow {"location":..., "time":...} structure for homeroom
+                event_location = entry.get("location")
+                event_time = entry.get("time", event_time)
+            else:
+                event_location = entry
     
     if not event_type:
         print(f"No scheduled event for today ({today_str}).")
@@ -85,18 +116,30 @@ def main():
     
     # --- Build and Send Message ---
     try:
-        header_text, body_text_main, body_text_sub, alt_text = "", event_location, f"วันนี้ เวลา {event_time} ครับ", ""
-        
+        # Prepare message texts using templates if provided in config
+        header_text = ""
+        # body_text_main is main headline / room or assembly message
+        body_text_main = event_location
+        body_text_sub = _safe_format(MESSAGE_TEMPLATES.get("body_sub_template", "วันนี้ เวลา {time} ครับ"), {"time": event_time, "location": event_location, "detail": event_detail})
+        alt_text = ""
+
         if event_type == "homeroom":
             weeks_passed = (now_in_bangkok.date() - CYCLE_START_DATE).days // 7
             current_week_type = "A" if weeks_passed % 2 == 0 else "B"
-            header_text = f"HOMEROOM REMINDER (WEEK {current_week_type})"
-            alt_text = f"Week {current_week_type}: วันนี้ Homeroom {event_location} เวลา {event_time} ครับ"
+            header_template = MESSAGE_TEMPLATES.get("homeroom_header", "HOMEROOM REMINDER (WEEK {week_type})")
+            header_text = _safe_format(header_template, {"week_type": current_week_type, "location": event_location, "time": event_time})
+            alt_template = MESSAGE_TEMPLATES.get("homeroom_alt", "Week {week_type}: วันนี้ Homeroom {location} เวลา {time} ครับ")
+            alt_text = _safe_format(alt_template, {"week_type": current_week_type, "location": event_location, "time": event_time, "detail": event_detail})
         elif event_type == "assembly":
-            header_text = "ASSEMBLY NOTICE"
+            header_template = MESSAGE_TEMPLATES.get("assembly_header", "ASSEMBLY NOTICE")
+            header_text = _safe_format(header_template, {"location": event_location, "time": event_time, "detail": event_detail})
             body_text_main = f"เข้าแถวรวมที่ {event_location}"
-            alt_text = f"แจ้งเตือน: วันนี้เข้าแถวรวมที่ {event_location} เวลา {event_time} ครับ"
-            if event_detail: alt_text += f" - {event_detail}"
+            alt_template = MESSAGE_TEMPLATES.get("assembly_alt", "แจ้งเตือน: วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ")
+            alt_text = _safe_format(alt_template, {"location": event_location, "time": event_time, "detail": event_detail})
+            if event_detail:
+                # allow templates to include detail; if not, append
+                if "{detail}" not in MESSAGE_TEMPLATES.get("assembly_alt", ""):
+                    alt_text += f" - {event_detail}"
 
         body_contents = [
             { "type": "text", "text": body_text_main, "weight": "bold", "size": "xl", "margin": "md", "wrap": True },

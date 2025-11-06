@@ -1,5 +1,13 @@
 {
   "cycle_start_date": "2025-10-27",
+  "default_event_time": "8:00",
+  "message_templates": {
+    "homeroom_header": "HOMEROOM REMINDER (WEEK {week_type})",
+    "assembly_header": "ASSEMBLY NOTICE",
+    "homeroom_alt": "Week {week_type}: วันนี้ Homeroom {location} เวลา {time} ครับ",
+    "assembly_alt": "แจ้งเตือน: วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ",
+    "body_sub_template": "วันนี้ เวลา {time} ครับ"
+  },
   "holidays": [],
   "special_assembly_days": {
     "2025-11-10": {
