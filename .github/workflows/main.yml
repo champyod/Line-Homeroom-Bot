@@ -6,7 +6,7 @@ on:
   schedule:
     # This is a cron string in the UTC timezone.
     # 00:45 UTC is 7:45 AM in Bangkok (UTC+7).
-    - cron: '45 0 * * 1-5'
+    - cron: '40 11 * * 1-5'
   
   # This line allows you to run the workflow manually from the "Actions" tab
   workflow_dispatch:
