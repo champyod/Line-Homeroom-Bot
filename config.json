@@ -31,6 +31,18 @@
       "time": "07:50"
     }
   },
+  "special_homeroom_days": {
+    "2025-11-06": {
+      "location": "ห้อง 2302",
+      "time": "08:15",
+      "templates": {
+        "header": "HOMEROOM พิเศษ (WEEK {week_type})",
+        "body_main": "โฮมรูมพิเศษ {location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้โฮมรูมพิเศษที่ {location} เวลา {time} ครับ"
+      }
+    }
+  },
   "room_schedule": {
     "0": {
       "location": "ห้อง 2302",

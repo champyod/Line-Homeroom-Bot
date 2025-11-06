@@ -37,6 +37,7 @@ def main():
         CYCLE_START_DATE = datetime.strptime(config["cycle_start_date"], '%Y-%m-%d').date()
         HOLIDAYS = config.get("holidays", [])
         SPECIAL_ASSEMBLY_DAYS = config.get("special_assembly_days", {})
+        SPECIAL_HOMEROOM_DAYS = config.get("special_homeroom_days", {})
         ROOM_SCHEDULE = config.get("room_schedule", {})
         DEFAULT_HOMEROOM_TIME = config.get("default_homeroom_time", "8:00")
         DEFAULT_ASSEMBLY_TIME = config.get("default_assembly_time", "8:00")
@@ -70,6 +71,13 @@ def main():
         event_location = event_data.get("location", "ไม่ระบุ")
         event_detail = event_data.get("detail")
         event_time = event_data.get("time", DEFAULT_ASSEMBLY_TIME)
+        entry_templates = event_data.get("templates", {})
+    elif today_str in SPECIAL_HOMEROOM_DAYS:
+        event_data = SPECIAL_HOMEROOM_DAYS[today_str]
+        event_type = "homeroom"
+        event_location = event_data.get("location", "ไม่ระบุ")
+        event_detail = event_data.get("detail")
+        event_time = event_data.get("time", DEFAULT_HOMEROOM_TIME)
         entry_templates = event_data.get("templates", {})
     elif str(weekday) in ROOM_SCHEDULE:
         entry = ROOM_SCHEDULE[str(weekday)]
