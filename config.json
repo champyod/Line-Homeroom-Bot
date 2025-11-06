@@ -4,6 +4,14 @@
   "default_homeroom_time": "08:00",
   "default_assembly_time": "07:50",
   
+  // Header colors for different event types
+  "colors": {
+    "homeroom": "#007BFF",
+    "assembly": "#28A745", 
+    "special_homeroom": "#FF6B35",
+    "special_assembly": "#C1427B"
+  },
+  
   // Global message templates
   "message_templates": {
     "homeroom_header": "HOMEROOM REMINDER (WEEK {week_type})",

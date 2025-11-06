@@ -48,6 +48,12 @@ def main():
         DEFAULT_HOMEROOM_TIME = config.get("default_homeroom_time", "8:00")
         DEFAULT_ASSEMBLY_TIME = config.get("default_assembly_time", "8:00")
         MESSAGE_TEMPLATES = config.get("message_templates", {})
+        COLORS = config.get("colors", {
+            "homeroom": "#007BFF",
+            "assembly": "#28A745",
+            "special_homeroom": "#FF6B35", 
+            "special_assembly": "#C1427B"
+        })
     except (TypeError, ValueError, KeyError) as e:
         print(f"Error parsing config values: {e}. Check format in config.json.")
         return
@@ -68,12 +74,14 @@ def main():
             return template
 
     # --- Determine Event ---
+    is_special = False
     if today_str in HOLIDAYS:
         print(f"Today ({today_str}) is a holiday. No message sent.")
         return
     elif today_str in SPECIAL_ASSEMBLY_DAYS:
         event_data = SPECIAL_ASSEMBLY_DAYS[today_str]
         event_type = "assembly"
+        is_special = True
         event_location = event_data.get("location", "ไม่ระบุ")
         event_detail = event_data.get("detail")
         event_time = event_data.get("time", DEFAULT_ASSEMBLY_TIME)
@@ -81,6 +89,7 @@ def main():
     elif today_str in SPECIAL_HOMEROOM_DAYS:
         event_data = SPECIAL_HOMEROOM_DAYS[today_str]
         event_type = "homeroom"
+        is_special = True
         event_location = event_data.get("location", "ไม่ระบุ")
         event_detail = event_data.get("detail")
         event_time = event_data.get("time", DEFAULT_HOMEROOM_TIME)
@@ -151,6 +160,12 @@ def main():
         body_text_main = _safe_format(body_main_template, template_ctx)
         body_text_sub = _safe_format(body_sub_template, {"time": event_time, "location": event_location, "detail": event_detail})
 
+        # --- Determine Header Color ---
+        if is_special:
+            header_color = COLORS.get(f"special_{event_type}", COLORS.get(event_type, "#DC3545"))
+        else:
+            header_color = COLORS.get(event_type, "#DC3545")
+
         body_contents = [
             { "type": "text", "text": body_text_main, "weight": "bold", "size": "xl", "margin": "md", "wrap": True },
             { "type": "text", "text": body_text_sub, "size": "md", "color": "#555555", "margin": "md" }
@@ -159,10 +174,11 @@ def main():
             body_contents.append({"type": "box", "layout": "vertical", "margin": "lg", "spacing": "sm", "contents": [{"type": "box", "layout": "baseline", "spacing": "sm", "contents": [{"type": "text", "text": "รายละเอียด", "color": "#aaaaaa", "size": "sm", "flex": 2}, {"type": "text", "text": event_detail, "wrap": True, "color": "#666666", "size": "sm", "flex": 5}]}]})
 
         line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
-        message_contents = {"type": "bubble", "header": {"type": "box", "layout": "vertical", "contents": [{"type": "text", "text": header_text, "weight": "bold", "color": "#FFFFFF", "size": "sm"}], "backgroundColor": "#DC3545", "paddingAll": "md"}, "body": {"type": "box", "layout": "vertical", "contents": body_contents}, "styles": {"header": {"separator": True}}}
+        message_contents = {"type": "bubble", "header": {"type": "box", "layout": "vertical", "contents": [{"type": "text", "text": header_text, "weight": "bold", "color": "#FFFFFF", "size": "sm"}], "backgroundColor": header_color, "paddingAll": "md"}, "body": {"type": "box", "layout": "vertical", "contents": body_contents}, "styles": {"header": {"separator": True}}}
         flex_message = FlexSendMessage(alt_text=alt_text, contents=message_contents)
         line_bot_api.push_message(GROUP_ID, flex_message)
-        print(f"{today_str}: Message sent for {event_type} at {event_location}")
+        event_type_display = f"special {event_type}" if is_special else event_type
+        print(f"{today_str}: Message sent for {event_type_display} at {event_location} (color: {header_color})")
 
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
