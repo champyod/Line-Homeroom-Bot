@@ -19,10 +19,10 @@
       "detail": "culteral day",
       "time": "07:50",
       "templates": {
-        "header": "ASSEMBLY NOTICE",
-        "body_main": "เข้าแถวรวมที่ {location}",
-        "body_sub": "วันนี้ เวลา {time} ครับ",
-        "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
+        "assembly_header": "ASSEMBLY NOTICE",
+        "assembly_body_main": "เข้าแถวรวมที่ {location}",
+        "assembly_body_sub": "วันนี้ เวลา {time} ครับ",
+        "assembly_alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
       }
     },
     "2025-11-11": {
@@ -36,10 +36,10 @@
       "location": "ห้อง 2302",
       "time": "08:15",
       "templates": {
-        "header": "HOMEROOM พิเศษ (WEEK {week_type})",
-        "body_main": "โฮมรูมพิเศษ {location}",
-        "body_sub": "วันนี้ เวลา {time} ครับ",
-        "alt": "วันนี้โฮมรูมพิเศษที่ {location} เวลา {time} ครับ"
+        "homeroom_header": "HOMEROOM พิเศษ (WEEK {week_type})",
+        "homeroom_body_main": "โฮมรูมพิเศษ {location}",
+        "homeroom_body_sub": "วันนี้ เวลา {time} ครับ",
+        "homeroom_alt": "วันนี้โฮมรูมพิเศษที่ {location} เวลา {time} ครับ"
       }
     }
   },
@@ -49,10 +49,10 @@
       "type": "homeroom",
       "time": "08:00",
       "templates": {
-        "header": "HOMEROOM REMINDER (WEEK {week_type})",
-        "body_main": "โฮมรูมห้อง {location}",
-        "body_sub": "วันนี้ เวลา {time} ครับ",
-        "alt": "วันนี้โฮมรูมห้อง {location} เวลา {time} ครับ"
+        "homeroom_header": "HOMEROOM REMINDER (WEEK {week_type})",
+        "homeroom_body_main": "โฮมรูมห้อง {location}",
+        "homeroom_body_sub": "วันนี้ เวลา {time} ครับ",
+        "homeroom_alt": "วันนี้โฮมรูมห้อง {location} เวลา {time} ครับ"
       }
     },
     "1": [
@@ -66,10 +66,10 @@
       "detail": "เข้าแถวรวมระดับชั้น",
       "time": "07:50",
       "templates": {
-        "header": "ASSEMBLY NOTICE",
-        "body_main": "เข้าแถวรวมที่ {location}",
-        "body_sub": "วันนี้ เวลา {time} ครับ",
-        "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
+        "assembly_header": "ASSEMBLY NOTICE",
+        "assembly_body_main": "เข้าแถวรวมที่ {location}",
+        "assembly_body_sub": "วันนี้ เวลา {time} ครับ",
+        "assembly_alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
       }
     },
     "4": "ห้อง 1107"
