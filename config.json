@@ -50,6 +50,7 @@
     "2025-11-10": {
       "location": "ห้อง 2302",
       "time": "08:00",
+      "detail": "08:45 : หอประชุมพระอุบาลี กิจกรรม Cultural Day",
       "templates": {
         "header": "SPECIAL HOMEROOM (WEEK {week_type})",
         "body_main": "โฮมรูมที่ {location}",
