@@ -27,17 +27,17 @@
   
   // Special assembly days with custom locations and times
   "special_assembly_days": {
-    "2025-11-10": {
-      "location": "หอประชุมพระอุบาลี",
-      "detail": "culteral day",
-      "time": "07:50",
-      "templates": {
-        "header": "SPECIAL ASSEMBLY NOTICE",
-        "body_main": "{location}",
-        "body_sub": "วันนี้ เวลา {time} ครับ",
-        "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
-      }
-    },
+    // "2025-11-10": {
+    //   "location": "หอประชุมพระอุบาลี",
+    //   "detail": "culteral day",
+    //   "time": "07:50",
+    //   "templates": {
+    //     "header": "SPECIAL ASSEMBLY NOTICE",
+    //     "body_main": "{location}",
+    //     "body_sub": "วันนี้ เวลา {time} ครับ",
+    //     "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
+    //   }
+    // },
     "2025-11-11": {
       "location": "สนามฟุตบอล",
       "detail": "พิธีเปิดกีฬาสี",
@@ -47,16 +47,16 @@
     }
   },
   "special_homeroom_days": {
-    // "2025-11-06": {
-    //   "location": "ห้อง 2302",
-    //   "time": "08:15",
-    //   "templates": {
-    //     "header": "SPECIAL HOMEROOM (WEEK {week_type})",
-    //     "body_main": "โฮมรูมพิเศษ {location}",
-    //     "body_sub": "วันนี้ เวลา {time} ครับ",
-    //     "alt": "วันนี้โฮมรูมพิเศษที่ {location} เวลา {time} ครับ"
-    //   }
-    // }
+    "2025-11-10": {
+      "location": "ลานพระอาทิตย์",
+      "time": "08:00",
+      "templates": {
+        "header": "SPECIAL HOMEROOM (WEEK {week_type})",
+        "body_main": "โฮมรูมพิเศษ {location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้โฮมรูมพิเศษที่ {location} เวลา {time} ครับ"
+      }
+    }
   },
   "room_schedule": {
     "0": {
