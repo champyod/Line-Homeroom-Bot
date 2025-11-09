@@ -18,7 +18,7 @@
     "assembly_header": "ASSEMBLY NOTICE",
     "homeroom_alt": "Week {week_type}: วันนี้ Homeroom {location} เวลา {time} ครับ",
     "assembly_alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ",
-    "homeroom_body_main": "โฮมรูมห้อง {location}",
+    "homeroom_body_main": "โฮมรูมที่ {location}",
     "assembly_body_main": "เข้าแถวรวมที่ {location}",
     "homeroom_body_sub": "วันนี้ เวลา {time} ครับ",
     "assembly_body_sub": "วันนี้ เวลา {time} ครับ"
@@ -48,13 +48,13 @@
   },
   "special_homeroom_days": {
     "2025-11-10": {
-      "location": "ลานพระอาทิตย์",
+      "location": "ห้อง 2302",
       "time": "08:00",
       "templates": {
         "header": "SPECIAL HOMEROOM (WEEK {week_type})",
-        "body_main": "โฮมรูมพิเศษ {location}",
+        "body_main": "โฮมรูมที่ {location}",
         "body_sub": "วันนี้ เวลา {time} ครับ",
-        "alt": "วันนี้โฮมรูมพิเศษที่ {location} เวลา {time} ครับ"
+        "alt": "วันนี้โฮมรูมที่ {location} เวลา {time} ครับ"
       }
     }
   },
@@ -65,7 +65,7 @@
       "time": "08:00",
       "templates": {
         "header": "HOMEROOM REMINDER (WEEK {week_type})",
-        "body_main": "โฮมรูมห้อง {location}",
+        "body_main": "โฮมรูมที่ {location}",
         "body_sub": "วันนี้ เวลา {time} ครับ",
         "alt": "วันนี้โฮมรูมห้อง {location} เวลา {time} ครับ"
       }
