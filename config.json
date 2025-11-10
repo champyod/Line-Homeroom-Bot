@@ -27,22 +27,15 @@
   
   // Special assembly days with custom locations and times
   "special_assembly_days": {
-    // "2025-11-10": {
-    //   "location": "หอประชุมพระอุบาลี",
-    //   "detail": "culteral day",
-    //   "time": "07:50",
-    //   "templates": {
-    //     "header": "SPECIAL ASSEMBLY NOTICE",
-    //     "body_main": "{location}",
-    //     "body_sub": "วันนี้ เวลา {time} ครับ",
-    //     "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
-    //   }
-    // },
     "2025-11-11": {
       "location": "สนามฟุตบอล",
-      "detail": "พิธีเปิดกีฬาสี",
+      "detail": "พิธีเปิดงานศรีตรังเกมส์",
+      "time": "07:20",
       "templates": {
-        "header": "SPECIAL ASSEMBLY NOTICE"
+        "header": "SPECIAL ASSEMBLY NOTICE",
+        "body_main": "เข้าแถวตามสีที่ {location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้เข้าแถวรวมตามสีที่ {location} เวลา {time} ครับ"
       }
     }
   },
