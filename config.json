@@ -37,6 +37,17 @@
         "body_sub": "วันนี้ เวลา {time} ครับ",
         "alt": "วันนี้เข้าแถวรวมตามสีที่ {location} เวลา {time} ครับ"
       }
+    },
+    "2025-11-18": {
+      "location": "หอประชุมพระอุบาลี",
+      "detail": "พิธีแสดงความยินดี",
+      "time": "07:00",
+      "templates": {
+        "header": "SPECIAL ASSEMBLY NOTICE",
+        "body_main": "เข้าแถวที่ {location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
+      }
     }
   },
   "special_homeroom_days": {
