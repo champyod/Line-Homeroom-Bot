@@ -11,6 +11,31 @@ from linebot.exceptions import LineBotApiError
 
 load_dotenv()
 
+# File to persist the last day a message was sent (YYYY-MM-DD)
+LAST_SEND_FILE = 'last_send.json'
+
+
+def load_last_send_date():
+    """Return the last send date as 'YYYY-MM-DD' string or None if missing/invalid."""
+    try:
+        if not os.path.exists(LAST_SEND_FILE):
+            return None
+        with open(LAST_SEND_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get('last_send_date')
+    except Exception:
+        return None
+
+
+def save_last_send_date(date_str: str):
+    """Persist the last send date (expects 'YYYY-MM-DD')."""
+    try:
+        with open(LAST_SEND_FILE, 'w', encoding='utf-8') as f:
+            json.dump({'last_send_date': date_str}, f, ensure_ascii=False)
+    except Exception as e:
+        # Non-fatal: log and continue
+        print(f"Warning: failed to update last send date: {e}")
+
 # ==============================================================================
 # --- LOGIC SECTION ---
 # ==============================================================================
@@ -122,6 +147,12 @@ def main():
         print(f"No scheduled event for today ({today_str}).")
         return
 
+    # --- Daily-send guard: do not send more than once per day ---
+    last_send_date = load_last_send_date()
+    if last_send_date == today_str:
+        print(f"Already sent today ({today_str}). Skipping sending message.")
+        return
+
     current_week_type = None
     if event_type == "homeroom":
         weeks_passed = (now_in_bangkok.date() - CYCLE_START_DATE).days // 7
@@ -177,6 +208,12 @@ def main():
         message_contents = {"type": "bubble", "header": {"type": "box", "layout": "vertical", "contents": [{"type": "text", "text": header_text, "weight": "bold", "color": "#FFFFFF", "size": "sm"}], "backgroundColor": header_color, "paddingAll": "md"}, "body": {"type": "box", "layout": "vertical", "contents": body_contents}, "styles": {"header": {"separator": True}}}
         flex_message = FlexSendMessage(alt_text=alt_text, contents=message_contents)
         line_bot_api.push_message(GROUP_ID, flex_message)
+        # Record today's date so the bot won't send again today
+        try:
+            save_last_send_date(today_str)
+        except Exception:
+            # save_last_send_date already logs errors; continue
+            pass
         event_type_display = f"special {event_type}" if is_special else event_type
         print(f"{today_str}: Message sent for {event_type_display} at {event_location} (color: {header_color})")
 
