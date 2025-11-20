@@ -48,6 +48,28 @@
         "body_sub": "วันนี้ เวลา {time} ครับ",
         "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
       }
+    },
+    "2025-11-20": {
+      "location": "หอประชุมพระอุบาลี",
+      "detail": "ต้อนรับนักเรียนแลกเปลี่ยน",
+      "time": "07:00",
+      "templates": {
+        "header": "SPECIAL ASSEMBLY NOTICE",
+        "body_main": "เข้าแถว {location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
+      }
+    },
+    "2025-11-21": {
+      "location": "หอประชุมพระอุบาลี",
+      "detail": "พิธีมอบเหรียญรางวัลศรีตรังเกมส์ ครั้งที่ 34",
+      "time": "07:00",
+      "templates": {
+        "header": "SPECIAL ASSEMBLY NOTICE",
+        "body_main": "เข้าแถว {location}",
+        "body_sub": "วันนี้ เวลา {time} ครับ",
+        "alt": "วันนี้เข้าแถวรวมที่ {location} เวลา {time} ครับ"
+      }
     }
   },
   "special_homeroom_days": {
