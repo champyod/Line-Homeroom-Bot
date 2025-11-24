@@ -4,7 +4,8 @@ A simple, configurable Python bot to send daily homeroom and assembly reminders 
 
 ## Features
 
-- **Daily Reminders:** Automatically sends a message each morning with the day's homeroom or assembly details.
+- **Automated Scheduler Service:** Background service that runs continuously and sends messages at the precise time (21 minutes 17 seconds before events).
+- **Daily Reminders:** Automatically sends messages each day with homeroom or assembly details.
 - **Flexible Scheduling:**
     - Supports A/B week cycles for alternating schedules.
     - Handles regular weekly schedules based on the day of the week.
@@ -16,7 +17,10 @@ A simple, configurable Python bot to send daily homeroom and assembly reminders 
 - **Highly Customizable:**
     - Configure all schedules, locations, times, and holidays via a single `config.json` file.
     - Customize message content, headers, and alternate texts using message templates.
-- **LINE Flex Messages:** Sends nicely formatted, easy-to-read messages using the LINE Flex Message format.
+    - Support for JSON comments in config file.
+- **LINE Flex Messages:** Sends nicely formatted, easy-to-read messages using the LINE Flex Message format with color-coded headers.
+- **TUI Mode:** Interactive terminal interface with live countdown timer and progress bar.
+- **Developer Mode:** Verbose logging for debugging and monitoring.
 
 ## Installation
 
@@ -37,10 +41,17 @@ A simple, configurable Python bot to send daily homeroom and assembly reminders 
 
 ### 1. `config.json`
 
+Copy `config.json.example` to `config.json` and customize it with your schedule:
+
+```bash
+cp config.json.example config.json
+```
+
 This file contains all the scheduling and message template configurations.
 
 -   `cycle_start_date`: The start date (YYYY-MM-DD) for the A/B week calculation.
 -   `default_homeroom_time` / `default_assembly_time`: Default times for events if not specified elsewhere.
+-   `colors`: Custom header colors for different event types (homeroom, assembly, special events).
 -   `message_templates`: Global templates for message parts (headers, body, etc.).
 -   `holidays`: A list of dates in "YYYY-MM-DD" format when no messages should be sent.
 -   `special_assembly_days` / `special_homeroom_days`: Override the regular schedule for specific dates. You can set a custom location, time, detail, and even message templates for each special day.
@@ -62,33 +73,99 @@ GROUP_ID="YOUR_TARGET_GROUP_ID"
 
 ## Usage
 
-Run the bot manually:
+### Manual Execution
+
+Run the bot once to send a message for today's event:
 
 ```bash
 python main.py
 ```
 
-The script will check the current date, determine the appropriate event, and send a message if one is scheduled.
+### Background Scheduler Service (Recommended)
 
-### Scheduling (Automation)
-
-To run the bot automatically every day, you can set up a cron job (on Linux/macOS) or a Task Scheduler job (on Windows).
-
-**Cron Job (Linux/macOS)**
-
-This example runs the script at 7:00 AM every day.
+Run the continuous scheduler service that automatically sends messages 21 minutes 17 seconds before each event:
 
 ```bash
-0 7 * * * /path/to/your/project/venv/bin/python /path/to/your/project/main.py
+# Normal mode
+python scheduler_service.py
+
+# With TUI (interactive display with countdown)
+python scheduler_service.py --tui
+# or
+python scheduler_service.py -t
+
+# With verbose logging
+python scheduler_service.py --dev
+# or
+python scheduler_service.py -d
+
+# TUI + Dev mode
+python scheduler_service.py -t -d
 ```
 
-**Windows Task Scheduler**
+**TUI Mode Features:**
+- Real-time countdown timer
+- Live progress bar
+- Current time display
+- Event information
+- Next check time
+- Message statistics
+- Status indicators with emojis
 
-The `run_bot.bat` script is provided for convenience.
+### Windows
 
-1.  Open **Task Scheduler**.
-2.  Click **Create Basic Task...**
-3.  Set the **Trigger** to run daily at your desired time (e.g., 7:00 AM).
-4.  For the **Action**, select **Start a program**.
-5.  In the "Program/script" field, browse to and select the `run_bot.bat` file in your project directory.
-6.  Complete the wizard. The task will now run automatically.
+Use the provided batch files:
+
+```batch
+run_scheduler_service.bat
+```
+
+Or run silently in background using VBScript:
+
+```batch
+start_scheduler_silent.vbs
+```
+
+### Linux/macOS
+
+Run the scheduler as a background service or use systemd/launchd for automatic startup.
+
+## How It Works
+
+The scheduler service:
+1. Checks the schedule every 5 minutes
+2. Calculates the exact send time (event time - 21 minutes 17 seconds)
+3. Creates a precise timer to send the message at that exact moment
+4. Sends the message by running `main.py`
+5. Prevents duplicate sends using `last_send.json`
+
+All logic for message formatting is in `main.py`, making it easy to test and debug independently.
+
+## Logs
+
+- **Console Output**: Real-time status (normal mode) or TUI display (TUI mode)
+- **File Logging**: All events are logged to `scheduler_service.log`
+- **Dev Mode**: Detailed debug information including timing calculations
+
+## Version History
+
+### v1.1.0 (2025-11-24)
+- Added background scheduler service with precise timing
+- Implemented TUI mode with live countdown and progress bar
+- Added developer mode with verbose logging
+- Refactored to use `main.py` for message sending (single source of truth)
+- Added command-line arguments: `--tui/-t`, `--dev/-d`
+- Improved error handling and reporting
+- Added `config.json.example` template
+- Updated `.gitignore` to exclude `config.json`
+- Enhanced documentation
+
+### v1.0.0 (2025-11-20)
+- Initial release
+- Daily homeroom and assembly reminders
+- A/B week cycle support
+- Special events handling
+- Customizable message templates
+- Color-coded event headers
+- Holiday support
+- JSON comments support in config
