@@ -82,6 +82,10 @@ def calculate_effective_weeks(start_date, target_date, skip_weeks):
             skip_start = datetime.strptime(skip_period['start'], '%Y-%m-%d').date()
             skip_end = datetime.strptime(skip_period['end'], '%Y-%m-%d').date()
             
+            # Validate that end date is not before start date
+            if skip_end < skip_start:
+                continue
+            
             # Only count skipped days if they fall within our date range
             if skip_end < start_date or skip_start > target_date:
                 continue
