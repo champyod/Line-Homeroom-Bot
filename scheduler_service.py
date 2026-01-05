@@ -57,6 +57,49 @@ LAST_SEND_FILE = 'last_send.json'
 ADVANCE_TIME_MINUTES = 21
 ADVANCE_TIME_SECONDS = 17
 
+
+def calculate_effective_weeks(start_date, target_date, skip_weeks):
+    """
+    Calculate the effective number of weeks between start_date and target_date,
+    excluding weeks specified in skip_weeks.
+    
+    Args:
+        start_date: The cycle start date (date object)
+        target_date: The target date to calculate weeks for (date object)
+        skip_weeks: List of dicts with 'start' and 'end' dates to skip
+    
+    Returns:
+        Number of effective weeks (int)
+    """
+    if not skip_weeks:
+        return (target_date - start_date).days // 7
+    
+    total_days = (target_date - start_date).days
+    skipped_days = 0
+    
+    for skip_period in skip_weeks:
+        try:
+            skip_start = datetime.strptime(skip_period['start'], '%Y-%m-%d').date()
+            skip_end = datetime.strptime(skip_period['end'], '%Y-%m-%d').date()
+            
+            # Only count skipped days if they fall within our date range
+            if skip_end < start_date or skip_start > target_date:
+                continue
+            
+            # Adjust boundaries to fit within our range
+            effective_skip_start = max(skip_start, start_date)
+            effective_skip_end = min(skip_end, target_date)
+            
+            # Count the days in this skip period
+            days_to_skip = (effective_skip_end - effective_skip_start).days + 1
+            skipped_days += days_to_skip
+        except (KeyError, ValueError, TypeError):
+            # Skip invalid entries
+            continue
+    
+    effective_days = total_days - skipped_days
+    return max(0, effective_days) // 7
+
 def load_last_send_date():
     """Return the last send date as 'YYYY-MM-DD' string or None if missing/invalid."""
     try:
@@ -105,6 +148,7 @@ def get_event_for_date(config, target_date):
         ROOM_SCHEDULE = config.get("room_schedule", {})
         DEFAULT_HOMEROOM_TIME = config.get("default_homeroom_time", "08:00")
         DEFAULT_ASSEMBLY_TIME = config.get("default_assembly_time", "07:50")
+        SKIP_WEEKS = config.get("skip_weeks", [])
     except (TypeError, ValueError, KeyError) as e:
         logger.error(f"Error parsing config values: {e}")
         return None
@@ -149,7 +193,7 @@ def get_event_for_date(config, target_date):
             entry_templates = entry.get("templates", {})
         elif isinstance(entry, list):
             event_type = "homeroom"
-            weeks_passed = (target_date - CYCLE_START_DATE).days // 7
+            weeks_passed = calculate_effective_weeks(CYCLE_START_DATE, target_date, SKIP_WEEKS)
             week_type = "A" if weeks_passed % 2 == 0 else "B"
             event_location = entry[0] if week_type == "A" else entry[1]
             event_detail = None
@@ -167,7 +211,7 @@ def get_event_for_date(config, target_date):
 
     # Calculate week type for homeroom events if not already set
     if event_type == "homeroom" and week_type is None:
-        weeks_passed = (target_date - CYCLE_START_DATE).days // 7
+        weeks_passed = calculate_effective_weeks(CYCLE_START_DATE, target_date, SKIP_WEEKS)
         week_type = "A" if weeks_passed % 2 == 0 else "B"
 
     return {

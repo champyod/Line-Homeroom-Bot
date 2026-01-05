@@ -54,6 +54,7 @@ This file contains all the scheduling and message template configurations.
 -   `colors`: Custom header colors for different event types (homeroom, assembly, special events).
 -   `message_templates`: Global templates for message parts (headers, body, etc.).
 -   `holidays`: A list of dates in "YYYY-MM-DD" format when no messages should be sent.
+-   `skip_weeks`: A list of date ranges (with `start` and `end` dates in "YYYY-MM-DD" format) to exclude from the A/B week calculation. This is useful for mid-term breaks or other periods when school is not in session, ensuring the week cycle doesn't advance during these periods.
 -   `special_assembly_days` / `special_homeroom_days`: Override the regular schedule for specific dates. You can set a custom location, time, detail, and even message templates for each special day.
 -   `room_schedule`: Defines the default weekly schedule. Weekdays are numbered "0" (Monday) to "6" (Sunday).
     -   For A/B weeks, provide a list of two locations.

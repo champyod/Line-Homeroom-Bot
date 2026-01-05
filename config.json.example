@@ -25,6 +25,17 @@
   },
   "holidays": [], // Add holiday dates here
   
+  // Skip weeks configuration for mid-term breaks
+  // These weeks will not count toward the A/B week cycle calculation
+  // Each entry should have "start" and "end" dates in YYYY-MM-DD format
+  "skip_weeks": [
+    // Example: Mid-term break from Oct 7-13, 2025
+    // {
+    //   "start": "2025-10-07",
+    //   "end": "2025-10-13"
+    // }
+  ],
+  
   // Special assembly days with custom locations and times
   "special_assembly_days": {
     "2025-11-11": {
