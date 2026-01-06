@@ -2,7 +2,7 @@ import os
 import warnings
 import json
 import re
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import pytz
 from dotenv import load_dotenv
 from linebot import LineBotApi
@@ -62,11 +62,16 @@ def calculate_effective_weeks(start_date, target_date, skip_weeks):
             effective_end = min(skip_end, target_date)
             yield effective_start, effective_end
 
-    skipped_days = 0
+    # Use a set to track unique skipped days (handles overlapping periods)
+    skipped_days_set = set()
     for effective_start, effective_end in _iter_effective_skip_periods():
-        # +1 because both endpoints are inclusive
-        skipped_days += (effective_end - effective_start).days + 1
-    effective_days = total_days - skipped_days
+        # Add each day in this period to the set to avoid counting overlapping days twice
+        current_day = effective_start
+        while current_day <= effective_end:
+            skipped_days_set.add(current_day)
+            current_day += timedelta(days=1)
+    
+    effective_days = total_days - len(skipped_days_set)
     return max(0, effective_days) // 7
 
 

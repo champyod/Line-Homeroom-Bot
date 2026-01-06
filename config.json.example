@@ -25,15 +25,33 @@
   },
   "holidays": [], // Add holiday dates here
   
+  // Skip weeks configuration for mid-term breaks
+  // These date ranges are excluded from the A/B week cycle calculation.
+  // Skip periods don't need to be perfect weeks (7 days) - any date range works.
+  // 
+  // How it works:
+  // - The bot counts DAYS (not weeks) and divides by 7 to get the week number
+  // - Skipped days are subtracted before dividing by 7
+  // - This means partial weeks or mid-week breaks work correctly
+  // - Overlapping periods are handled automatically (each day counted only once)
+  //
+  // Example scenarios:
+  // 1. Full week break (Mon-Sun): Skips 7 days, week counter doesn't advance
+  // 2. Mid-week break (Thu-Mon): Skips 5 days, week may advance mid-week
+  // 3. Overlapping periods: Each day is counted only once
+  //
+  // Practical example with mid-week break:
+  // - Week A starts Monday Oct 27
+  // - Break: Thursday Oct 30 to Monday Nov 3 (5 days)
+  // - Result: Only 2 days counted (Tue 28, Wed 29), still Week A
+  // - Tuesday Nov 4: Week A continues (only 2 effective days passed)
+  // - Tuesday Nov 11: Week B starts (9 effective days = 1 week + 2 days)
   "skip_weeks": [
-    // These ranges are excluded from the A/B week cycle calculation.
-    // The rotation resumes on the first active school day after the break.
-    // This allows for mid-week rotation shifts; for example, if a break ends 
-    // on Wednesday, Thursday could be Week A and Friday could be Week B.
-    {
-      "start": "2025-10-07",
-      "end": "2025-10-13"
-    }
+    // Example: Mid-term break
+    // {
+    //   "start": "2025-10-07",
+    //   "end": "2025-10-13"
+    // }
   ],
   
   // Special assembly days with custom locations and times

@@ -71,37 +71,50 @@ def calculate_effective_weeks(start_date, target_date, skip_weeks):
     Returns:
         Number of effective weeks (int)
     """
+    # Fast path when there are no skip periods configured
     if not skip_weeks:
         return (target_date - start_date).days // 7
-    
+
     total_days = (target_date - start_date).days
-    skipped_days = 0
-    
-    for skip_period in skip_weeks:
-        try:
-            skip_start = datetime.strptime(skip_period['start'], '%Y-%m-%d').date()
-            skip_end = datetime.strptime(skip_period['end'], '%Y-%m-%d').date()
-            
-            # Validate that end date is not before start date
+
+    def _iter_effective_skip_periods():
+        """
+        Yield (effective_start, effective_end) date tuples for each valid
+        skip period that overlaps [start_date, target_date].
+        """
+        for raw_period in skip_weeks:
+            try:
+                raw_start = raw_period["start"]
+                raw_end = raw_period["end"]
+                skip_start = datetime.strptime(raw_start, "%Y-%m-%d").date()
+                skip_end = datetime.strptime(raw_end, "%Y-%m-%d").date()
+            except (KeyError, ValueError, TypeError):
+                # Skip invalid entries
+                continue
+
+            # Ignore logically invalid ranges
             if skip_end < skip_start:
                 continue
-            
-            # Only count skipped days if they fall within our date range
+
+            # Ignore periods that are completely outside our window
             if skip_end < start_date or skip_start > target_date:
                 continue
-            
-            # Adjust boundaries to fit within our range
-            effective_skip_start = max(skip_start, start_date)
-            effective_skip_end = min(skip_end, target_date)
-            
-            # Count the days in this skip period
-            days_to_skip = (effective_skip_end - effective_skip_start).days + 1
-            skipped_days += days_to_skip
-        except (KeyError, ValueError, TypeError):
-            # Skip invalid entries
-            continue
+
+            # Clamp the period to [start_date, target_date]
+            effective_start = max(skip_start, start_date)
+            effective_end = min(skip_end, target_date)
+            yield effective_start, effective_end
+
+    # Use a set to track unique skipped days (handles overlapping periods)
+    skipped_days_set = set()
+    for effective_start, effective_end in _iter_effective_skip_periods():
+        # Add each day in this period to the set to avoid counting overlapping days twice
+        current_day = effective_start
+        while current_day <= effective_end:
+            skipped_days_set.add(current_day)
+            current_day += timedelta(days=1)
     
-    effective_days = total_days - skipped_days
+    effective_days = total_days - len(skipped_days_set)
     return max(0, effective_days) // 7
 
 def load_last_send_date():
