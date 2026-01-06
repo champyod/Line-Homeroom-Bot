@@ -9,6 +9,7 @@ import subprocess
 from datetime import datetime, timedelta, date
 import pytz
 from dotenv import load_dotenv
+from week_utils import calculate_effective_weeks
 
 # Parse command line arguments
 DEV_MODE = any(arg in sys.argv for arg in ['--log=dev', '-log=dev', '-d', '--dev'])
@@ -105,6 +106,7 @@ def get_event_for_date(config, target_date):
         ROOM_SCHEDULE = config.get("room_schedule", {})
         DEFAULT_HOMEROOM_TIME = config.get("default_homeroom_time", "08:00")
         DEFAULT_ASSEMBLY_TIME = config.get("default_assembly_time", "07:50")
+        SKIP_WEEKS = config.get("skip_weeks", [])
     except (TypeError, ValueError, KeyError) as e:
         logger.error(f"Error parsing config values: {e}")
         return None
@@ -149,7 +151,7 @@ def get_event_for_date(config, target_date):
             entry_templates = entry.get("templates", {})
         elif isinstance(entry, list):
             event_type = "homeroom"
-            weeks_passed = (target_date - CYCLE_START_DATE).days // 7
+            weeks_passed = calculate_effective_weeks(CYCLE_START_DATE, target_date, SKIP_WEEKS)
             week_type = "A" if weeks_passed % 2 == 0 else "B"
             event_location = entry[0] if week_type == "A" else entry[1]
             event_detail = None
@@ -167,7 +169,7 @@ def get_event_for_date(config, target_date):
 
     # Calculate week type for homeroom events if not already set
     if event_type == "homeroom" and week_type is None:
-        weeks_passed = (target_date - CYCLE_START_DATE).days // 7
+        weeks_passed = calculate_effective_weeks(CYCLE_START_DATE, target_date, SKIP_WEEKS)
         week_type = "A" if weeks_passed % 2 == 0 else "B"
 
     return {

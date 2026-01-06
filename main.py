@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from linebot import LineBotApi
 from linebot.models import FlexSendMessage
 from linebot.exceptions import LineBotApiError
+from week_utils import calculate_effective_weeks
 
 load_dotenv()
 
@@ -73,6 +74,7 @@ def main():
         DEFAULT_HOMEROOM_TIME = config.get("default_homeroom_time", "8:00")
         DEFAULT_ASSEMBLY_TIME = config.get("default_assembly_time", "8:00")
         MESSAGE_TEMPLATES = config.get("message_templates", {})
+        SKIP_WEEKS = config.get("skip_weeks", [])
         COLORS = config.get("colors", {
             "homeroom": "#007BFF",
             "assembly": "#28A745",
@@ -130,7 +132,7 @@ def main():
             entry_templates = entry.get("templates", {})
         elif isinstance(entry, list):
             event_type = "homeroom"
-            weeks_passed = (now_in_bangkok.date() - CYCLE_START_DATE).days // 7
+            weeks_passed = calculate_effective_weeks(CYCLE_START_DATE, now_in_bangkok.date(), SKIP_WEEKS)
             current_week_type = "A" if weeks_passed % 2 == 0 else "B"
             event_location = entry[0] if current_week_type == "A" else entry[1]
             event_detail = None
@@ -155,7 +157,7 @@ def main():
 
     current_week_type = None
     if event_type == "homeroom":
-        weeks_passed = (now_in_bangkok.date() - CYCLE_START_DATE).days // 7
+        weeks_passed = calculate_effective_weeks(CYCLE_START_DATE, now_in_bangkok.date(), SKIP_WEEKS)
         current_week_type = "A" if weeks_passed % 2 == 0 else "B"
     
     # --- Build and Send Message ---
