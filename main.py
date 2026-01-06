@@ -18,7 +18,7 @@ LAST_SEND_FILE = 'last_send.json'
 def calculate_effective_weeks(start_date, target_date, skip_weeks):
     """
     Calculate the effective number of weeks between start_date and target_date,
-    excluding weeks specified in skip_weeks.
+    excluding date ranges specified in skip_weeks.
     
     Args:
         start_date: The cycle start date (date object)
