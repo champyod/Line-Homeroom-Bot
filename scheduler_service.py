@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from week_utils import calculate_effective_weeks
 
 # Parse command line arguments
-DEV_MODE = any(arg in sys.argv for arg in ['--log=dev', '-log=dev', '-d', '--dev'])
+DEV_MODE = any(arg in sys.argv for arg in ['--log=dev', '-log=dev', '-d', '--dev', '--debug'])
 TUI_MODE = any(arg in sys.argv for arg in ['--tui', '-t'])
 
 # Configure logging
@@ -46,7 +46,8 @@ tui_state = {
     'time_remaining': '',
     'next_check': '',
     'last_action': '',
-    'message_count': 0
+    'message_count': 0,
+    'config': None
 }
 
 load_dotenv()
@@ -288,6 +289,13 @@ def draw_tui():
     """Draw the TUI interface."""
     clear_screen()
     
+    if DEV_MODE:
+        draw_debug_tui()
+    else:
+        draw_simple_tui()
+
+def draw_simple_tui():
+    """Draw the standard user information TUI."""
     width = 70
     
     # Header
@@ -359,6 +367,137 @@ def draw_tui():
     print("-" * width)
     print("  Press Ctrl+C to stop the service".center(width))
     print("-" * width)
+
+
+def draw_debug_tui():
+    """Draw the detailed debug TUI."""
+    config = tui_state.get('config')
+    width = 100 
+    
+    print("=" * width)
+    print("  LINE HOMEROOM BOT - DEBUG MODE".center(width))
+    print("=" * width)
+
+    # 1. Environment & Config Details
+    bangkok_tz = pytz.timezone("Asia/Bangkok")
+    now = datetime.now(bangkok_tz)
+    today = now.date()
+    
+    print(f"  [Environment]")
+    print(f"  Current Time : {now.strftime('%Y-%m-%d %H:%M:%S')} (Week {now.isocalendar()[1]})")
+    print(f"  Group ID     : {os.environ.get('GROUP_ID', 'Not Set')[:5]}***")
+    
+    if not config:
+        print("  Config       : Not loaded yet")
+        print("-" * width)
+        return
+
+    cycle_start = datetime.strptime(config["cycle_start_date"], '%Y-%m-%d').date()
+    skip_weeks = config.get("skip_weeks", [])
+    
+    print(f"  Cycle Start  : {cycle_start}")
+    print(f"  Skip Weeks   : {len(skip_weeks)} periods defined")
+    # Show raw skip weeks if brief
+    if skip_weeks:
+        for i, sw in enumerate(skip_weeks):
+            print(f"    #{i+1}: {sw.get('start')} -> {sw.get('end')}")
+
+    print("-" * width)
+
+    # 2. Week Calculation Logic
+    print(f"  [Week Rotation Math]")
+    
+    # Replicate calculation to show details
+    total_days = (today - cycle_start).days
+    
+    # Calculate skip days details
+    skipped_days_set = set()
+    for raw_period in skip_weeks:
+        try:
+            s_start = datetime.strptime(raw_period["start"], "%Y-%m-%d").date()
+            s_end = datetime.strptime(raw_period["end"], "%Y-%m-%d").date()
+            if s_end < s_start or s_end < cycle_start or s_start > today:
+                continue
+            eff_start = max(s_start, cycle_start)
+            eff_end = min(s_end, today)
+            curr = eff_start
+            while curr <= eff_end:
+                skipped_days_set.add(curr)
+                curr += timedelta(days=1)
+        except:
+            pass
+            
+    skipped_count = len(skipped_days_set)
+    effective_days = total_days - skipped_count
+    weeks_passed = max(0, effective_days) // 7
+    week_type = "A" if weeks_passed % 2 == 0 else "B"
+    
+    print(f"  Total Days Since Start : {total_days}")
+    print(f"  (-) Skipped Days       : {skipped_count}")
+    print(f"  (=) Effective Days     : {effective_days}")
+    print(f"  (/) Weeks Passed       : {weeks_passed} (Floor({effective_days} / 7))")
+    print(f"  (%) Modulo 2           : {weeks_passed % 2} -> Week Type {week_type}")
+    
+    print("-" * width)
+    
+    # 3. Weekly Schedule Table (Sunday to Saturday)
+    print(f"  [Weekly Schedule: {today.strftime('%Y')}-W{now.isocalendar()[1]}]")
+    print(f"  {'Date':<12} | {'Day':<9} | {'WkType':<6} | {'Event Type':<15} | {'Location':<20} | {'Event Time':<10} | {'Next Send':<15}")
+    print(f"  {'-'*12}-+-{'-'*9}-+-{'-'*6}-+-{'-'*15}-+-{'-'*20}-+-{'-'*10}-+-{'-'*15}")
+    
+    # Find start of current week (Sunday)
+    # Python weekday: Mon=0, Sun=6. 
+    # To get last Sunday: subtract (weekday + 1) % 7 days
+    days_since_sunday = (today.weekday() + 1) % 7
+    start_sunday = today - timedelta(days=days_since_sunday)
+    
+    for i in range(7):
+        target_date = start_sunday + timedelta(days=i)
+        is_today = (target_date == today)
+        marker = ">>" if is_today else "  "
+        
+        info = get_event_for_date(config, target_date)
+        
+        if info:
+            evt_type = info['event_type']
+            wk_type = info.get('week_type') or "-"
+            loc = info['event_location'] or "-"
+            evt_time = info['event_time']
+            
+            # Calculate send time logic
+            send_dt = calculate_send_time(target_date, evt_time)
+            send_time_str = send_dt.strftime('%H:%M:%S') if send_dt else "Err"
+            
+            # Highlight Today
+            if is_today:
+                date_str = f"{marker} {target_date.strftime('%m-%d')}"
+            else:
+                date_str = f"   {target_date.strftime('%m-%d')}"
+                
+            day_name = target_date.strftime('%A')
+            
+            print(f"  {date_str:<12} | {day_name:<9} | {wk_type:<6} | {evt_type:<15} | {loc[:20]:<20} | {evt_time:<10} | {send_time_str:<15}")
+        else:
+            # Empty day
+            if is_today:
+                date_str = f"{marker} {target_date.strftime('%m-%d')}"
+            else:
+                date_str = f"   {target_date.strftime('%m-%d')}"
+            day_name = target_date.strftime('%A')
+            print(f"  {date_str:<12} | {day_name:<9} | {'-':<6} | {'No Event':<15} | {'-':<20} | {'-':<10} | {'-':<15}")
+
+    print("-" * width)
+    
+    # 4. Status
+    last_send = load_last_send_date() or "None"
+    print(f"  Last Sent Date: {last_send}")
+    print(f"  Current Status: {tui_state['status']}")
+    print(f"  Message Count : {tui_state['message_count']}")
+    
+    if tui_state['last_action']:
+        print(f"  Last Action   : {tui_state['last_action']}")
+        
+    print("=" * width)
 
 
 def log_message(level, message):
@@ -522,6 +661,9 @@ def run_scheduler():
                         draw_tui()
                     time.sleep(5)
                     continue
+                
+                # Store config for Debug TUI
+                tui_state['config'] = config
                 
                 # Get today's event
                 event_info = get_event_for_date(config, current_date)
